@@ -9,7 +9,7 @@ Static site for [triple-h.ca](https://triple-h.ca). Hosted on GitHub Pages, 360Â
 - **Lenis** for smooth scrolling
 - **Pannellum** for WebGL 360Â° panoramas
 - Assets served from Cloudflare R2 (`pub-1008667921dc46088c845c1f999cb016.r2.dev`)
-- Deployed to GitHub Pages with custom domain `triple-h.ca` (see `CNAME`)
+- Deployed to GitHub Pages. Currently serves at `triplehinc.github.io/triple-h-website/`. Custom domain `triple-h.ca` will be attached (via a `CNAME` file + Pages settings) once DNS is switched off Wix.
 
 ## Pages
 
