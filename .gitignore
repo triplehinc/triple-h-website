@@ -1,0 +1,30 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Claude Code local settings (user-specific)
+.claude/settings.local.json
+.claude/agent-tools-lock.json
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Node (in case tooling is added later)
+node_modules/
+npm-debug.log*
+
+# Local 360 originals — the site loads them from Cloudflare R2 in production.
+# GitHub Pages has a 100 MB per-file limit and a ~1 GB soft repo limit;
+# these images total ~800 MB, so they don't belong in the repo.
+# Keep them in place locally for offline reference and future ffmpeg work.
+images/*.jpg
+images/*.JPG
+images/*.jpeg
+images/*.JPEG
+images/*.png
