@@ -18,301 +18,194 @@
   <link rel="preconnect" href="https://pub-1008667921dc46088c845c1f999cb016.r2.dev" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/immersive.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
 </head>
 <body>
-  <div id="top"></div>
-  <a href="#main" class="skip-link" style="position:absolute;left:-9999px;">Skip to Main Content</a>
 
-  <!-- Header -->
-  <header class="site-header">
-    <div class="header-inner">
-      <a href="index.html" class="site-logo">TRIPLE H<sup>&reg;</sup></a>
-      <div class="nav-and-social">
-        <nav class="site-nav" aria-label="Site">
-          <ul>
-            <li><a href="index.html" class="active">Home</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="inaction.html">In Action</a></li>
-          </ul>
-        </nav>
-        <div class="social-bar">
-          <a href="https://www.instagram.com/tripleh.inc/" target="_blank" rel="noopener" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
-          </a>
-        </div>
-      </div>
-    </div>
+  <!-- Fixed nav -->
+  <header class="nav" id="nav">
+    <a href="#top" class="nav__logo">TRIPLE H<sup>&reg;</sup></a>
+    <nav class="nav__links" aria-label="Site">
+      <a href="#services">Services</a>
+      <a href="#contact">Contact</a>
+    </nav>
   </header>
 
-  <!-- Main Content -->
-  <main id="main">
+  <main>
 
-    <!-- ============================
-         Scene 1: Hero pano sweep
-         ============================ -->
-    <section class="scene scene-hero" aria-label="Welcome">
-      <div class="scene-hero__pano"></div>
-      <div class="scene-hero__vignette"></div>
-      <div class="scene-hero__overlay">
-        <div class="scene-hero__eyebrow">Triple H Construction</div>
-        <h1 class="scene-hero__title">
-          <span class="scene-hero__title-italic">Crafted</span> spaces,<br>
-          built to last.
-        </h1>
-        <p class="scene-hero__subtitle">Renovations · Extensions · Design Build</p>
+    <!-- =====================================
+         ACT 1 — Hero. Ottawa aerial (autoplay loop).
+         ===================================== -->
+    <section class="act act--hero" id="top">
+      <video class="hero__video" autoplay muted loop playsinline preload="auto"
+             poster="https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20251206/Living%20Room.jpg">
+        <source src="videos/ottawa-hero.mp4" type="video/mp4">
+      </video>
+      <div class="hero__vignette"></div>
+      <div class="hero__content">
+        <div class="eyebrow">Ottawa · Since 2020</div>
+        <h1 class="hero__title"><em>Crafted</em> spaces,<br>built to last.</h1>
+        <p class="hero__sub">Renovations · Extensions · Design Build</p>
       </div>
-      <div class="scene-hero__scroll-hint">Scroll to explore</div>
+      <div class="hero__scroll">Scroll</div>
     </section>
 
-    <!-- ============================
-         Section intro
-         ============================ -->
-    <section class="scene-intro reveal">
-      <div class="scene-intro__eyebrow">A timeline of transformation</div>
-      <h2 class="scene-intro__title">Watch a space come to life.</h2>
-      <p class="scene-intro__caption">From rough framing to finished room. Scroll to dissolve through time.</p>
-    </section>
-
-    <!-- ============================
-         Scene 2a: Kitchen time-lapse
-         ============================ -->
-    <section class="scene scene-timelapse"
-             data-project="bakervale"
-             data-room="Kitchen"
-             data-date-early="20250502"
-             data-date-late="20251206"
-             aria-label="Kitchen transformation">
-      <div class="scene-timelapse__stage">
-        <div class="scene-timelapse__pano scene-timelapse__pano--early">
-          <div class="scene-timelapse__pano-mount"></div>
-        </div>
-        <div class="scene-timelapse__pano scene-timelapse__pano--late">
-          <div class="scene-timelapse__pano-mount"></div>
-        </div>
-        <div class="scene-timelapse__atmosphere"></div>
+    <!-- =====================================
+         ACT 2 — Approach. House exterior, scroll-scrubbed.
+         ===================================== -->
+    <section class="act act--approach" id="approach">
+      <div class="approach__stage">
+        <video class="approach__video" muted playsinline preload="auto"
+               src="videos/house-exterior.mp4"></video>
       </div>
-      <div class="scene-timelapse__overlay">
-        <div class="scene-timelapse__date-row">
-          <span class="scene-timelapse__date">MAY 2025</span>
-          <div class="scene-timelapse__progress">
-            <div class="scene-timelapse__progress-fill"></div>
-          </div>
-        </div>
-        <h2 class="scene-timelapse__title">The Kitchen</h2>
-        <p class="scene-timelapse__caption">From an empty shell to the heart of the home.</p>
+      <div class="approach__content">
+        <div class="eyebrow reveal">Every project starts with a vision</div>
+        <h2 class="approach__title reveal">From the outside<br>in.</h2>
       </div>
     </section>
 
-    <!-- ============================
-         Scene 2b: Living Room time-lapse
-         ============================ -->
-    <section class="scene scene-timelapse"
-             data-project="bakervale"
-             data-room="Living%20Room"
-             data-date-early="20250502"
-             data-date-late="20251206"
-             aria-label="Living Room transformation">
-      <div class="scene-timelapse__stage">
-        <div class="scene-timelapse__pano scene-timelapse__pano--early">
-          <div class="scene-timelapse__pano-mount"></div>
-        </div>
-        <div class="scene-timelapse__pano scene-timelapse__pano--late">
-          <div class="scene-timelapse__pano-mount"></div>
-        </div>
-        <div class="scene-timelapse__atmosphere"></div>
-      </div>
-      <div class="scene-timelapse__overlay">
-        <div class="scene-timelapse__date-row">
-          <span class="scene-timelapse__date">MAY 2025</span>
-          <div class="scene-timelapse__progress">
-            <div class="scene-timelapse__progress-fill"></div>
-          </div>
-        </div>
-        <h2 class="scene-timelapse__title">The Living Room</h2>
-        <p class="scene-timelapse__caption">A room reimagined for everyday moments.</p>
+    <!-- =====================================
+         ACT 3 — Interior. Cross the threshold.
+         ===================================== -->
+    <section class="act act--interior" id="interior">
+      <div class="interior__img"></div>
+      <div class="interior__vignette"></div>
+      <div class="interior__content">
+        <h2 class="interior__title reveal"><em>Step inside.</em></h2>
+        <p class="interior__caption reveal">Every material chosen. Every finish considered. Every corner earned.</p>
       </div>
     </section>
 
-    <!-- ============================
-         Scene 2c: Bathroom time-lapse
-         ============================ -->
-    <section class="scene scene-timelapse"
-             data-project="bakervale"
-             data-room="Bathroom"
-             data-date-early="20250502"
-             data-date-late="20251206"
-             aria-label="Bathroom transformation">
-      <div class="scene-timelapse__stage">
-        <div class="scene-timelapse__pano scene-timelapse__pano--early">
-          <div class="scene-timelapse__pano-mount"></div>
-        </div>
-        <div class="scene-timelapse__pano scene-timelapse__pano--late">
-          <div class="scene-timelapse__pano-mount"></div>
-        </div>
-        <div class="scene-timelapse__atmosphere"></div>
+    <!-- =====================================
+         ACT 4 — Transformation. Before/After crossfade.
+         ===================================== -->
+    <section class="act act--transform" id="transform">
+      <div class="transform__stage">
+        <div class="transform__img transform__img--after"></div>
+        <div class="transform__img transform__img--before"></div>
       </div>
-      <div class="scene-timelapse__overlay">
-        <div class="scene-timelapse__date-row">
-          <span class="scene-timelapse__date">MAY 2025</span>
-          <div class="scene-timelapse__progress">
-            <div class="scene-timelapse__progress-fill"></div>
-          </div>
-        </div>
-        <h2 class="scene-timelapse__title">The Bathroom</h2>
-        <p class="scene-timelapse__caption">Detail and finish, every surface considered.</p>
+      <div class="transform__content">
+        <div class="transform__date reveal"><span id="transformDate">May 2025</span> &rarr; Dec 2025</div>
+        <h2 class="transform__title reveal">Watch a space<br><em>come to life.</em></h2>
       </div>
     </section>
 
-    <!-- ============================
-         Scene intro 2
-         ============================ -->
-    <section class="scene-intro reveal">
-      <div class="scene-intro__eyebrow">Step inside</div>
-      <h2 class="scene-intro__title">Look around. Take your time.</h2>
-      <p class="scene-intro__caption">Drag to explore a finished space in full 360°.</p>
-    </section>
-
-    <!-- ============================
-         Scene 3: 360 Viewer
-         ============================ -->
-    <section class="scene scene-360" aria-label="360 walkthrough">
-      <div class="scene-360__overlay">
-        <div class="scene-360__eyebrow">360° Walkthrough</div>
-        <h2 class="scene-360__title">A finished kitchen.</h2>
-        <p class="scene-360__caption">Real space. Real light. Click and drag to look around.</p>
-      </div>
-      <div class="scene-360__viewer"
-           data-project="bakervale"
-           data-date="20251206"
-           data-room="Kitchen"></div>
-      <div class="scene-360__hint">Drag to look around</div>
-    </section>
-
-    <!-- ============================
-         Services (3D tilt cards)
-         ============================ -->
-    <section class="section section-light" id="services">
-      <h2 class="section-title reveal" style="color: #2C2825; font-style: normal;">Services</h2>
-      <p class="section-subtitle reveal" style="color: #2C2825;">From vibrant renovations and custom extensions to our integrated design-build services,<br>we're here to elevate your living space to its fullest potential.</p>
-
-      <div class="services-grid services-grid--tilt">
-        <div class="service-item tilt-card reveal">
-          <div class="service-icon">
-            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-              <path d="M32 8L4 28h8v24h16V38h8v14h16V28h8L32 8z" stroke="#2C2825" fill="none" stroke-width="2" stroke-linejoin="round"/>
-              <circle cx="32" cy="28" r="6" stroke="#2C2825" fill="none" stroke-width="2"/>
-            </svg>
-          </div>
-          <h3>Renovation</h3>
-        </div>
-        <div class="service-item tilt-card reveal">
-          <div class="service-icon">
-            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-              <rect x="8" y="20" width="20" height="32" stroke="#2C2825" fill="none" stroke-width="2"/>
-              <rect x="36" y="8" width="20" height="44" stroke="#2C2825" fill="none" stroke-width="2"/>
-              <rect x="14" y="26" width="8" height="8" stroke="#2C2825" fill="none" stroke-width="1.5"/>
-              <rect x="14" y="38" width="8" height="8" stroke="#2C2825" fill="none" stroke-width="1.5"/>
-              <rect x="42" y="14" width="8" height="8" stroke="#2C2825" fill="none" stroke-width="1.5"/>
-              <rect x="42" y="26" width="8" height="8" stroke="#2C2825" fill="none" stroke-width="1.5"/>
-              <rect x="42" y="38" width="8" height="8" stroke="#2C2825" fill="none" stroke-width="1.5"/>
-            </svg>
-          </div>
-          <h3>Extensions &amp; Additions</h3>
-        </div>
-        <div class="service-item tilt-card reveal">
-          <div class="service-icon">
-            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-              <rect x="4" y="24" width="56" height="28" stroke="#2C2825" fill="none" stroke-width="2"/>
-              <line x1="4" y1="24" x2="32" y2="10" stroke="#2C2825" stroke-width="2"/>
-              <line x1="60" y1="24" x2="32" y2="10" stroke="#2C2825" stroke-width="2"/>
-              <line x1="16" y1="24" x2="16" y2="52" stroke="#2C2825" stroke-width="1.5"/>
-              <line x1="32" y1="24" x2="32" y2="52" stroke="#2C2825" stroke-width="1.5"/>
-              <line x1="48" y1="24" x2="48" y2="52" stroke="#2C2825" stroke-width="1.5"/>
-              <line x1="4" y1="38" x2="60" y2="38" stroke="#2C2825" stroke-width="1.5"/>
-            </svg>
-          </div>
-          <h3>Design Build</h3>
+    <!-- =====================================
+         ACT 5 — Services.
+         ===================================== -->
+    <section class="act act--services" id="services">
+      <div class="services__inner">
+        <div class="eyebrow eyebrow--light reveal">What we build</div>
+        <h2 class="services__title reveal">Three ways to work together.</h2>
+        <div class="services__grid">
+          <article class="service reveal">
+            <div class="service__icon">
+              <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M32 8L4 28h8v24h16V38h8v14h16V28h8L32 8z" stroke-linejoin="round"/>
+                <circle cx="32" cy="28" r="6"/>
+              </svg>
+            </div>
+            <h3>Renovation</h3>
+            <p>Whole-home, kitchen, bathroom, basement — bringing existing spaces up to standard, and beyond.</p>
+          </article>
+          <article class="service reveal">
+            <div class="service__icon">
+              <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="8" y="20" width="20" height="32"/>
+                <rect x="36" y="8" width="20" height="44"/>
+                <rect x="14" y="26" width="8" height="8" stroke-width="1"/>
+                <rect x="14" y="38" width="8" height="8" stroke-width="1"/>
+                <rect x="42" y="14" width="8" height="8" stroke-width="1"/>
+                <rect x="42" y="26" width="8" height="8" stroke-width="1"/>
+                <rect x="42" y="38" width="8" height="8" stroke-width="1"/>
+              </svg>
+            </div>
+            <h3>Extensions &amp; Additions</h3>
+            <p>Second-storey adds, in-law suites, garage conversions — expanding without leaving.</p>
+          </article>
+          <article class="service reveal">
+            <div class="service__icon">
+              <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="4" y="24" width="56" height="28"/>
+                <line x1="4" y1="24" x2="32" y2="10"/>
+                <line x1="60" y1="24" x2="32" y2="10"/>
+                <line x1="16" y1="24" x2="16" y2="52" stroke-width="1"/>
+                <line x1="32" y1="24" x2="32" y2="52" stroke-width="1"/>
+                <line x1="48" y1="24" x2="48" y2="52" stroke-width="1"/>
+                <line x1="4" y1="38" x2="60" y2="38" stroke-width="1"/>
+              </svg>
+            </div>
+            <h3>Design Build</h3>
+            <p>Architect and builder under one roof, from first sketch to move-in day.</p>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- ============================
-         Contact
-         ============================ -->
-    <section class="contact-section" id="contact">
-      <div class="contact-info reveal">
-        <h2>Get in Touch</h2>
-        <p>Call or Email for a Free Quote</p>
-        <p style="margin-top: 16px;">613 265 8878</p>
-        <p><a href="mailto:contact@triple-h.ca">contact@triple-h.ca</a></p>
-        <div class="contact-social" style="margin-top: 20px;">
-          <a href="https://www.instagram.com/tripleh.inc/" target="_blank" rel="noopener" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
-          </a>
+    <!-- =====================================
+         ACT 6 — Contact.
+         ===================================== -->
+    <section class="act act--contact" id="contact">
+      <div class="contact__inner">
+        <div class="contact__info reveal">
+          <div class="eyebrow">Get in touch</div>
+          <h2 class="contact__title">Let's talk about your space.</h2>
+          <p class="contact__blurb">Free quote. Ottawa &amp; the National Capital Region.</p>
+          <p class="contact__phone"><a href="tel:6132658878">613 265 8878</a></p>
+          <p class="contact__email"><a href="mailto:contact@triple-h.ca">contact@triple-h.ca</a></p>
         </div>
-      </div>
-      <div class="contact-form-wrapper reveal">
+
         <!--
-          Contact form is wired for Formspree.
-          TO ACTIVATE:
-          1. Sign up at https://formspree.io/register (free tier: 50 submissions/month)
-          2. Create a new form, set email destination to contact@triple-h.ca
-          3. Copy your form endpoint (looks like https://formspree.io/f/xnnnnnnn)
-          4. Replace YOUR_FORMSPREE_ID below with the ID from the endpoint
-          Until then, submissions show a placeholder message that tells visitors to email you directly.
+          Contact form uses Formspree.
+          TO ACTIVATE: sign up at https://formspree.io/register, create a form pointing
+          at contact@triple-h.ca, and replace YOUR_FORMSPREE_ID below with the ID from
+          your endpoint (looks like xnnnnnnn). Until then, submissions show a friendly
+          message pointing to the email.
         -->
-        <form class="contact-form" id="contactForm"
-              action="https://formspree.io/f/YOUR_FORMSPREE_ID"
-              method="POST">
+        <form class="contact__form reveal" id="contactForm"
+              action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST">
           <div class="form-row">
-            <div class="form-group">
-              <label for="firstName">First Name</label>
-              <input type="text" id="firstName" name="firstName" autocomplete="given-name">
-            </div>
-            <div class="form-group">
-              <label for="lastName">Last Name</label>
-              <input type="text" id="lastName" name="lastName" autocomplete="family-name">
-            </div>
+            <label>
+              <span>First name</span>
+              <input type="text" name="firstName" autocomplete="given-name">
+            </label>
+            <label>
+              <span>Last name</span>
+              <input type="text" name="lastName" autocomplete="family-name">
+            </label>
           </div>
-          <div class="form-group">
-            <label for="email">Email *</label>
-            <input type="email" id="email" name="email" autocomplete="email" required>
-          </div>
-          <div class="form-group">
-            <label for="message">Message</label>
-            <textarea id="message" name="message"></textarea>
-          </div>
-          <!-- Honeypot field for spam bots (real users won't fill this; Formspree ignores submissions where it's filled). -->
-          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
-          <!-- Custom reply-to + subject so emails land nicely in your inbox. -->
+          <label>
+            <span>Email *</span>
+            <input type="email" name="email" autocomplete="email" required>
+          </label>
+          <label>
+            <span>Message</span>
+            <textarea name="message" rows="4"></textarea>
+          </label>
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="honeypot">
           <input type="hidden" name="_subject" value="New enquiry from triple-h.ca">
-          <button type="submit" class="btn-send">Send</button>
-          <p class="form-success" id="formSuccess">Thanks for submitting!</p>
+          <button type="submit">Send</button>
+          <p class="form-success" id="formSuccess"></p>
         </form>
       </div>
     </section>
 
   </main>
 
-  <!-- Footer -->
-  <footer class="site-footer">
-    <p>by Triple H &copy;2020</p>
+  <footer class="footer">
+    <p>Triple H &copy; 2020&ndash;2026 &middot; Ottawa, ON</p>
+    <a href="https://www.instagram.com/tripleh.inc/" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="18" height="18" aria-hidden="true">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      </svg>
+    </a>
   </footer>
 
-  <!-- Libs -->
+  <!-- Libs (CDN) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
 
   <!-- App -->
-  <script src="js/immersive.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
