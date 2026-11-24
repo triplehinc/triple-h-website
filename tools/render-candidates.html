@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Candidate camera angles — Kitchen Dec 2025</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #1a1614;
+      color: #D4C5B2;
+      font-family: 'Libre Baskerville', Georgia, serif;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    h1 {
+      font-weight: 400;
+      font-size: 1.4rem;
+      margin-bottom: 6px;
+    }
+    p.lede {
+      font-size: 0.9rem;
+      color: #b8a99a;
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .card {
+      position: relative;
+      background: #000;
+      border: 1px solid rgba(212, 197, 178, 0.1);
+    }
+    .card canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .card .label {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(10, 9, 8, 0.75);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      color: #D4B89C;
+      backdrop-filter: blur(4px);
+    }
+    .status {
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #8a7e74;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Living Room → Kitchen — Candidate Camera Angles (Dec 2025)</h1>
+  <p class="lede">Flat perspective views extracted from the <strong>Living Room 360</strong>, looking in four cardinal directions. Whichever one shows the kitchen is the one we want for the time-lapse. Pick A, B, C, or D.</p>
+
+  <div class="grid" id="grid"></div>
+  <p class="status" id="status">Loading…</p>
+
+  <!-- Three.js r148 is the last UMD (non-module) release — loads with a plain script tag -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
+  <script>
+    // Living Room 360 — different physical camera position from Kitchen.jpg.
+    // The Living Room is adjacent to the Kitchen, so one of these yaws should
+    // frame both rooms in a single shot.
+    const PANO = 'https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20251206/Living%20Room.jpg';
+
+    // Four cardinal directions — we'll find which one points at the kitchen.
+    const ANGLES = [
+      { yaw:   0, label: 'A — Yaw 0° (camera front)' },
+      { yaw:  90, label: 'B — Yaw 90°  (turn right)' },
+      { yaw: 180, label: 'C — Yaw 180° (behind)' },
+      { yaw: 270, label: 'D — Yaw 270° (turn left)' },
+    ];
+
+    // Output size per thumbnail
+    const W = 640;
+    const H = 400;
+    const FOV = 85;       // slightly wider than before (was 75°) to capture more room
+    const PITCH = 0;      // level horizon
+
+    const status = document.getElementById('status');
+    const grid   = document.getElementById('grid');
+
+    const loader = new THREE.TextureLoader();
+    loader.crossOrigin = 'anonymous';
+    status.textContent = 'Fetching 360 image from R2…';
+
+    loader.load(
+      PANO,
+      (texture) => {
+        // r148 uses encoding; newer versions use colorSpace. Handle both defensively.
+        if ('colorSpace' in texture && THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
+        else if ('encoding' in texture && THREE.sRGBEncoding) texture.encoding = THREE.sRGBEncoding;
+        status.textContent = 'Rendering 3 angles…';
+
+        ANGLES.forEach(({ yaw, label }, i) => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          const canvas = document.createElement('canvas');
+          canvas.width = W;
+          canvas.height = H;
+          card.appendChild(canvas);
+          const lab = document.createElement('div');
+          lab.className = 'label';
+          lab.textContent = label;
+          card.appendChild(lab);
+          grid.appendChild(card);
+
+          // Fresh renderer + scene per card so they can be snapshotted independently
+          const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+          renderer.setSize(W, H, false);
+          if ('outputColorSpace' in renderer && THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
+          else if ('outputEncoding' in renderer && THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+
+          // Inside-out sphere wearing the 360 texture
+          const scene = new THREE.Scene();
+          const geo = new THREE.SphereGeometry(500, 80, 60);
+          geo.scale(-1, 1, 1);  // invert so the texture is on the inside
+          const mat = new THREE.MeshBasicMaterial({ map: texture });
+          scene.add(new THREE.Mesh(geo, mat));
+
+          // Camera at origin, rotated to the requested yaw/pitch
+          const cam = new THREE.PerspectiveCamera(FOV, W / H, 0.1, 1000);
+          cam.rotation.order = 'YXZ';
+          // Negative yaw so positive numbers feel like "turn right" to the viewer
+          cam.rotation.y = -yaw * Math.PI / 180;
+          cam.rotation.x = PITCH * Math.PI / 180;
+
+          renderer.render(scene, cam);
+        });
+
+        status.textContent = `Rendered ${ANGLES.length} candidates — pick A, B, or C.`;
+      },
+      undefined,
+      (err) => {
+        status.textContent = 'Failed to load the 360 image: ' + (err?.message || err);
+        console.error(err);
+      }
+    );
+  </script>
+</body>
+</html>
