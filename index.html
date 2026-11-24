@@ -50,43 +50,67 @@
     </section>
 
     <!-- =====================================
-         ACT 2 — Approach. House exterior, scroll-scrubbed.
+         ACT 2–4 — JOURNEY. One pinned scene with 5 beats:
+           01 Approach    — house exterior scrubs with scroll
+           02 Arrive      — exterior zooms in + fades to dark
+           03 Kitchen     — finished kitchen fades in
+           04 Living Room — crossfades to the living room
+           05 Transform   — before/after dissolve of the kitchen
          ===================================== -->
-    <section class="act act--approach" id="approach">
-      <div class="approach__stage">
-        <video class="approach__video" muted playsinline preload="auto"
-               src="videos/house-exterior.mp4"></video>
+    <section class="act act--journey" id="journey">
+      <!-- Stacked layers, order bottom→top = EXTERIOR < KITCHEN < LIVING < AFTER < BEFORE.
+           Opacity is driven by scroll in js/main.js. -->
+      <div class="journey__stage">
+        <div class="journey__layer journey__layer--exterior">
+          <video class="journey__video" muted playsinline preload="auto"
+                 src="videos/house-exterior.mp4"></video>
+        </div>
+        <div class="journey__layer journey__layer--kitchen"
+             style="background-image: url('https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20251206/Kitchen.jpg');"></div>
+        <div class="journey__layer journey__layer--living"
+             style="background-image: url('https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20251206/Living%20Room.jpg');"></div>
+        <div class="journey__layer journey__layer--after"
+             style="background-image: url('https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20251206/Kitchen.jpg');"></div>
+        <div class="journey__layer journey__layer--before"
+             style="background-image: url('https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20250502/Kitchen.jpg');"></div>
+        <div class="journey__vignette"></div>
       </div>
-      <div class="approach__content">
-        <div class="eyebrow reveal">Every project starts with a vision</div>
-        <h2 class="approach__title reveal">From the outside<br>in.</h2>
-      </div>
-    </section>
 
-    <!-- =====================================
-         ACT 3 — Interior. Cross the threshold.
-         ===================================== -->
-    <section class="act act--interior" id="interior">
-      <div class="interior__img"></div>
-      <div class="interior__vignette"></div>
-      <div class="interior__content">
-        <h2 class="interior__title reveal"><em>Step inside.</em></h2>
-        <p class="interior__caption reveal">Every material chosen. Every finish considered. Every corner earned.</p>
+      <!-- Captions, one shown at a time based on which beat we're in -->
+      <div class="journey__captions">
+        <div class="journey__caption is-active" data-beat="1">
+          <div class="eyebrow">01 · Approach</div>
+          <h2>From the outside<br><em>in.</em></h2>
+        </div>
+        <div class="journey__caption" data-beat="2">
+          <div class="eyebrow">02 · Arrive</div>
+          <h2>Every project starts<br>with <em>a vision.</em></h2>
+        </div>
+        <div class="journey__caption" data-beat="3">
+          <div class="eyebrow">03 · The Kitchen</div>
+          <h2>Step <em>inside.</em></h2>
+          <p>Every material chosen. Every finish considered.</p>
+        </div>
+        <div class="journey__caption" data-beat="4">
+          <div class="eyebrow">04 · The Living Room</div>
+          <h2>A space to <em>live in.</em></h2>
+          <p>Where the day begins and ends.</p>
+        </div>
+        <div class="journey__caption" data-beat="5">
+          <div class="eyebrow">05 · Transformation</div>
+          <h2>Watch a space<br><em>come to life.</em></h2>
+          <div class="journey__date" id="journeyDate">May 2025</div>
+        </div>
       </div>
-    </section>
 
-    <!-- =====================================
-         ACT 4 — Transformation. Before/After crossfade.
-         ===================================== -->
-    <section class="act act--transform" id="transform">
-      <div class="transform__stage">
-        <div class="transform__img transform__img--after"></div>
-        <div class="transform__img transform__img--before"></div>
-      </div>
-      <div class="transform__content">
-        <div class="transform__date reveal"><span id="transformDate">May 2025</span> &rarr; Dec 2025</div>
-        <h2 class="transform__title reveal">Watch a space<br><em>come to life.</em></h2>
-      </div>
+      <!-- Numbered progress indicator (Belgrade-style) -->
+      <ol class="journey__progress" aria-label="Journey progress">
+        <li data-beat="1" class="is-active"><span>01</span></li>
+        <li data-beat="2"><span>02</span></li>
+        <li data-beat="3"><span>03</span></li>
+        <li data-beat="4"><span>04</span></li>
+        <li data-beat="5"><span>05</span></li>
+      </ol>
     </section>
 
     <!-- =====================================

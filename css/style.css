@@ -203,83 +203,82 @@ html.lenis, html.lenis body { height: auto; }
 }
 
 /* ========================================
-   Act 2 — Approach (house exterior, scroll-scrub)
+   Act 2–4 — JOURNEY (pinned scene, 5 beats, Belgrade-Arbor style)
+   Section is 100vh visually but its parent will be pinned by GSAP
+   for several viewports of scroll. Layers stack and reveal with
+   opacity/transform driven by scroll progress.
    ======================================== */
-.act--approach {
+.act--journey {
   height: 100vh;
   background: var(--dark-3);
+  overflow: hidden;
 }
-.approach__stage {
+
+/* Stage holds all the layered visuals */
+.journey__stage {
   position: absolute;
   inset: 0;
   z-index: 0;
 }
-.approach__video {
+
+.journey__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  will-change: opacity, transform, filter;
+}
+
+/* z-index stack (bottom → top): exterior < kitchen < living < after < before */
+.journey__layer--exterior { z-index: 1; }
+.journey__layer--kitchen  { z-index: 2; opacity: 0; }
+.journey__layer--living   { z-index: 3; opacity: 0; }
+.journey__layer--after    { z-index: 4; opacity: 0; }
+.journey__layer--before   { z-index: 5; opacity: 0; }
+
+.journey__video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.75);
-}
-.approach__stage::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6) 100%);
-  pointer-events: none;
-}
-.approach__content {
-  position: absolute;
-  z-index: 2;
-  bottom: 0; left: 0; right: 0;
-  padding: var(--space-6) var(--space-4);
-  color: #fff;
-}
-.approach__title {
-  font-family: var(--serif);
-  font-weight: 400;
-  font-style: italic;
-  font-size: clamp(2rem, 5vw, 4rem);
-  line-height: 1.1;
-  max-width: 700px;
-  text-shadow: 0 2px 30px rgba(0,0,0,0.5);
 }
 
-/* ========================================
-   Act 3 — Interior (cross the threshold)
-   ======================================== */
-.act--interior {
-  height: 100vh;
-  background: var(--dark-3);
-}
-.interior__img {
+/* Vignette: always on top of imagery, below text */
+.journey__vignette {
   position: absolute;
   inset: 0;
-  background-image: url('https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20251206/Living%20Room.jpg');
-  background-size: cover;
-  background-position: center;
-  filter: brightness(0.7);
-  z-index: 0;
-  will-change: transform;
-}
-.interior__vignette {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background:
-    linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, rgba(0,0,0,0.8) 100%),
-    radial-gradient(ellipse at 30% 60%, transparent 40%, rgba(0,0,0,0.4) 100%);
+  z-index: 6;
   pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 25%, transparent 55%, rgba(0,0,0,0.75) 100%),
+    radial-gradient(ellipse at 30% 55%, transparent 35%, rgba(0,0,0,0.45) 100%);
 }
-.interior__content {
+
+/* Captions: all absolutely positioned at the bottom, only one visible at a time */
+.journey__captions {
   position: absolute;
-  z-index: 2;
+  z-index: 7;
   bottom: 0; left: 0; right: 0;
   padding: var(--space-6) var(--space-4);
   color: #fff;
-  max-width: 700px;
+  pointer-events: none;
 }
-.interior__title {
+.journey__caption {
+  position: absolute;
+  bottom: var(--space-6);
+  left: var(--space-4);
+  right: var(--space-4);
+  max-width: 700px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.journey__caption.is-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+.journey__caption h2 {
   font-family: var(--serif);
   font-weight: 400;
   font-size: clamp(2rem, 5vw, 4rem);
@@ -287,72 +286,83 @@ html.lenis, html.lenis body { height: auto; }
   margin-bottom: var(--space-2);
   text-shadow: 0 2px 30px rgba(0,0,0,0.7);
 }
-.interior__title em { font-style: italic; color: var(--gold); }
-.interior__caption {
+.journey__caption h2 em { font-style: italic; color: var(--gold); }
+.journey__caption p {
   font-size: 1rem;
   opacity: 0.9;
   max-width: 500px;
   text-shadow: 0 2px 20px rgba(0,0,0,0.7);
 }
-
-/* ========================================
-   Act 4 — Transformation (before/after)
-   ======================================== */
-.act--transform {
-  height: 100vh;
-  background: var(--dark-3);
-}
-.transform__stage {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-.transform__img {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  filter: brightness(0.72);
-  will-change: opacity;
-}
-.transform__img--before {
-  z-index: 2;
-  background-image: url('https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20250502/Kitchen.jpg');
-}
-.transform__img--after {
-  z-index: 1;
-  background-image: url('https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20251206/Kitchen.jpg');
-}
-.transform__stage::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.7) 100%);
-  pointer-events: none;
-}
-.transform__content {
-  position: absolute;
-  z-index: 4;
-  bottom: 0; left: 0; right: 0;
-  padding: var(--space-6) var(--space-4);
-  color: #fff;
-}
-.transform__date {
+.journey__date {
+  margin-top: var(--space-2);
   font-size: 0.85rem;
-  letter-spacing: 5px;
+  letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--gold);
-  margin-bottom: var(--space-2);
 }
-.transform__title {
+
+/* Numbered progress dots — fixed to the left edge of the scene.
+   Semi-transparent dark pill behind them so they're legible on both
+   bright interior shots and dark exteriors. */
+.journey__progress {
+  position: absolute;
+  z-index: 8;
+  top: 50%;
+  left: var(--space-3);
+  transform: translateY(-50%);
+  list-style: none;
+  padding: var(--space-3) var(--space-2) var(--space-3) 10px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   font-family: var(--serif);
-  font-weight: 400;
-  font-size: clamp(2rem, 5vw, 4rem);
-  line-height: 1.1;
-  text-shadow: 0 2px 30px rgba(0,0,0,0.7);
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.65);
+  user-select: none;
+  background: rgba(10, 9, 8, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 999px;
 }
-.transform__title em { font-style: italic; color: var(--gold); }
+.journey__progress li {
+  position: relative;
+  padding-left: 22px;
+  transition: color 0.4s ease;
+}
+.journey__progress li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.55;
+  transition: width 0.4s ease, opacity 0.4s ease;
+}
+.journey__progress li.is-active {
+  color: var(--gold);
+}
+.journey__progress li.is-active::before {
+  width: 18px;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .journey__progress {
+    font-size: 0.65rem;
+    gap: 10px;
+    left: 12px;
+  }
+  .journey__caption {
+    bottom: var(--space-4);
+    left: var(--space-3);
+    right: var(--space-3);
+  }
+}
 
 /* ========================================
    Act 5 — Services

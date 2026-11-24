@@ -92,78 +92,118 @@
     }
 
     // ====================
-    // Act 2 — Approach: scroll-scrubbed video
-    // ScrollTrigger drives video.currentTime as user scrolls through the pinned section.
+    // JOURNEY — one pinned section, 5 beats, Belgrade-Arbor style layered reveal.
+    //
+    // Pin lasts +=500% of scroll (5 extra viewports of scrolling while pinned).
+    // Scroll progress 0→1 is divided into 5 beats:
+    //   [0.00, 0.20]  01 Approach    — video scrubs 0 → end
+    //   [0.20, 0.35]  02 Arrive      — exterior scales up + fades to dark
+    //   [0.35, 0.55]  03 Kitchen     — finished kitchen fades in on top
+    //   [0.55, 0.75]  04 Living Room — crossfades to living room
+    //   [0.75, 1.00]  05 Transform   — before/after dissolve of the kitchen
     // ====================
-    const approachSection = document.querySelector('.act--approach');
-    const approachVideo = document.querySelector('.approach__video');
+    const journeySection = document.querySelector('.act--journey');
+    const journeyVideo   = journeySection && journeySection.querySelector('.journey__video');
+    const layerExterior  = journeySection && journeySection.querySelector('.journey__layer--exterior');
+    const layerKitchen   = journeySection && journeySection.querySelector('.journey__layer--kitchen');
+    const layerLiving    = journeySection && journeySection.querySelector('.journey__layer--living');
+    const layerBefore    = journeySection && journeySection.querySelector('.journey__layer--before');
+    const layerAfter     = journeySection && journeySection.querySelector('.journey__layer--after');
+    const captions       = journeySection ? journeySection.querySelectorAll('.journey__caption') : [];
+    const progressItems  = journeySection ? journeySection.querySelectorAll('.journey__progress li') : [];
+    const journeyDate    = document.getElementById('journeyDate');
 
-    if (hasGSAP && !reduceMotion && approachSection && approachVideo) {
-      // iOS/Safari need the video to have "played once" before currentTime updates render.
-      // We do a silent play+pause on the first user interaction so the frames become scrubbable.
+    if (hasGSAP && !reduceMotion && journeySection && journeyVideo) {
+      // iOS/Safari: video needs to have "played once" before currentTime updates render
       let scrubUnlocked = false;
       const unlockScrub = () => {
         if (scrubUnlocked) return;
         scrubUnlocked = true;
-        const p = approachVideo.play();
+        const p = journeyVideo.play();
         if (p && typeof p.then === 'function') {
-          p.then(() => approachVideo.pause()).catch(() => {});
+          p.then(() => journeyVideo.pause()).catch(() => {});
         }
       };
       ['scroll', 'touchstart', 'pointerdown'].forEach((ev) =>
         window.addEventListener(ev, unlockScrub, { once: true, passive: true })
       );
 
-      const setupScrub = () => {
-        if (!approachVideo.duration || !isFinite(approachVideo.duration)) return;
+      // Utility: clamp an un-clamped t (anywhere in ℝ) into [0, 1]
+      const clamp01 = (t) => Math.max(0, Math.min(1, t));
+      // Utility: fade range (returns 0 before `start`, 1 after `end`, linear in between)
+      const fade = (p, start, end) => clamp01((p - start) / (end - start));
+
+      // Track current beat to avoid redundant DOM writes on caption/progress swaps
+      let activeBeat = 1;
+      const setBeat = (beat) => {
+        if (beat === activeBeat) return;
+        activeBeat = beat;
+        captions.forEach((c) => c.classList.toggle('is-active', +c.dataset.beat === beat));
+        progressItems.forEach((li) => li.classList.toggle('is-active', +li.dataset.beat === beat));
+      };
+
+      const setupJourney = () => {
+        if (!journeyVideo.duration || !isFinite(journeyVideo.duration)) return;
+
         ScrollTrigger.create({
-          trigger: approachSection,
+          trigger: journeySection,
           start: 'top top',
-          end: '+=200%',   // pin for 2 viewports of scroll → smooth scrub
+          end: '+=500%',          // 5 viewports of scroll while pinned
           pin: true,
           scrub: 0.6,
           anticipatePin: 1,
           onUpdate: (self) => {
-            const t = self.progress * approachVideo.duration;
-            // Only update if changed meaningfully (avoids over-work on some browsers)
-            if (Math.abs(approachVideo.currentTime - t) > 0.03) {
-              approachVideo.currentTime = t;
+            const p = self.progress;
+
+            // ---- Beat 01 (0 → 0.20): video scrubs from frame 0 → end ----
+            const videoP = clamp01(p / 0.20);
+            const t = videoP * journeyVideo.duration;
+            if (Math.abs(journeyVideo.currentTime - t) > 0.03) {
+              journeyVideo.currentTime = t;
             }
+
+            // ---- Beat 02 (0.20 → 0.35): exterior scales up 1 → 1.4, darkens ----
+            const zoom = 1 + fade(p, 0.00, 0.40) * 0.4;
+            const bright = 1 - fade(p, 0.25, 0.45) * 0.75;
+            layerExterior.style.transform = `scale(${zoom.toFixed(3)})`;
+            layerExterior.style.filter = `brightness(${bright.toFixed(3)}) contrast(1.05)`;
+
+            // ---- Beat 03 (0.35 → 0.55): kitchen fades IN ----
+            layerKitchen.style.opacity = fade(p, 0.32, 0.50).toFixed(3);
+
+            // ---- Beat 04 (0.55 → 0.75): living room fades IN over kitchen ----
+            layerLiving.style.opacity = fade(p, 0.55, 0.70).toFixed(3);
+
+            // ---- Beat 05 (0.75 → 1.00): before/after dissolve on top ----
+            // First the "after" image slides in (so there's always something under "before")
+            layerAfter.style.opacity = fade(p, 0.73, 0.80).toFixed(3);
+            // Then "before" fades in over it, then fades out again to reveal "after"
+            const beforeIn  = fade(p, 0.75, 0.82);
+            const beforeOut = fade(p, 0.88, 0.98);
+            layerBefore.style.opacity = (beforeIn * (1 - beforeOut)).toFixed(3);
+
+            // Date label reflects which image dominates right now:
+            //   before layer >= 50% opacity → May 2025
+            //   else                         → Dec 2025
+            if (journeyDate) {
+              const beforeNow = beforeIn * (1 - beforeOut);
+              const nextLabel = beforeNow >= 0.5 ? 'May 2025' : 'Dec 2025';
+              if (journeyDate.textContent !== nextLabel) journeyDate.textContent = nextLabel;
+            }
+
+            // Which beat is "current" for caption + progress highlighting
+            let beat = 1;
+            if (p >= 0.20) beat = 2;
+            if (p >= 0.35) beat = 3;
+            if (p >= 0.55) beat = 4;
+            if (p >= 0.75) beat = 5;
+            setBeat(beat);
           },
         });
       };
 
-      if (approachVideo.readyState >= 1) setupScrub();
-      else approachVideo.addEventListener('loadedmetadata', setupScrub, { once: true });
-    }
-
-    // ====================
-    // Act 4 — Transformation: crossfade "before" out to reveal "after" underneath
-    // ====================
-    if (hasGSAP && !reduceMotion) {
-      const transformSection = document.querySelector('.act--transform');
-      const beforeImg = document.querySelector('.transform__img--before');
-      const dateSpan = document.getElementById('transformDate');
-
-      if (transformSection && beforeImg) {
-        ScrollTrigger.create({
-          trigger: transformSection,
-          start: 'top top',
-          end: '+=180%',
-          pin: true,
-          scrub: 0.5,
-          anticipatePin: 1,
-          onUpdate: (self) => {
-            // Dissolve happens in the first 60% of the pin; last 40% lingers on "after"
-            const p = self.progress;
-            const dissolve = Math.min(1, p / 0.6);
-            beforeImg.style.opacity = String(1 - dissolve);
-            if (dateSpan) {
-              dateSpan.textContent = p < 0.5 ? 'May 2025' : 'Dec 2025';
-            }
-          },
-        });
-      }
+      if (journeyVideo.readyState >= 1) setupJourney();
+      else journeyVideo.addEventListener('loadedmetadata', setupJourney, { once: true });
     }
 
     // ====================
