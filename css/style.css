@@ -231,17 +231,34 @@ html.lenis, html.lenis body { height: auto; }
   will-change: opacity, transform, filter;
 }
 
-/* z-index stack (bottom → top): exterior < kitchen < living < after < before */
+/* z-index stack (bottom → top): exterior < kitchen < living < timelapse */
 .journey__layer--exterior { z-index: 1; }
 .journey__layer--kitchen  { z-index: 2; opacity: 0; }
 .journey__layer--living   { z-index: 3; opacity: 0; }
-.journey__layer--after    { z-index: 4; opacity: 0; }
-.journey__layer--before   { z-index: 5; opacity: 0; }
 
 .journey__video {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* Time-lapse container: holds 7 construction frames, controlled by JS */
+.journey__timelapse {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  opacity: 0;              /* container fades in during beat 5 */
+  will-change: opacity;
+}
+.journey__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;              /* individual frame opacities swap per scroll */
+  will-change: opacity;
 }
 
 /* Vignette: always on top of imagery, below text */

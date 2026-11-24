@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Time-lapse batch renderer</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #1a1614; color: #D4C5B2; font-family: Georgia, serif; padding: 24px; }
+    h1 { font-weight: 400; font-size: 1.3rem; margin-bottom: 8px; }
+    p { color: #b8a99a; font-size: 0.9rem; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .card { background: #000; position: relative; }
+    .card canvas { width: 100%; height: auto; display: block; }
+    .card .label {
+      position: absolute; bottom: 8px; left: 8px;
+      background: rgba(10,9,8,0.75); padding: 4px 10px; font-size: 0.75rem; color: #D4B89C;
+    }
+    .status { margin-top: 16px; font-size: 0.85rem; color: #8a7e74; }
+    .done { color: #D4B89C; }
+  </style>
+</head>
+<body>
+  <h1>Living Room → Kitchen · Time-lapse batch render</h1>
+  <p>Rendering 7 dated snapshots at yaw 0° / pitch 0 / FOV 85°. Each becomes <code>window.frames['YYYYMMDD']</code> (a canvas) when done.</p>
+  <div class="grid" id="grid"></div>
+  <div class="status" id="status">Queued…</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
+  <script>
+    const R2 = 'https://pub-1008667921dc46088c845c1f999cb016.r2.dev';
+    const PROJECT = '1-1067Bakervale%20Drive/images';
+    const ROOM = 'Living%20Room';
+
+    // Per-date yaw from the alignment tool (align-timelapse.html).
+    // Each 360 was shot with the camera facing a different direction,
+    // so each frame needs a different yaw to end up at the same framing.
+    const YAWS = {
+      '20250502': 158.2,
+      '20250621': 334.4,
+      '20250705':  25.9,
+      '20250731':  70.0,
+      '20250823': 278.4,
+      '20250919': 280.8,
+      '20251206':   0.0,
+    };
+    const DATES = Object.keys(YAWS);
+
+    const PITCH = 0;
+    const FOV   = 85;
+    const W     = 1600;
+    const H     = 1000;
+    const JPEG_QUALITY = 0.82;
+
+    const grid   = document.getElementById('grid');
+    const status = document.getElementById('status');
+
+    // Expose canvases for later extraction: `window.frames['20250502']` is a canvas
+    window.frames = {};
+    window.frameDataUrl = (date) => window.frames[date]?.toDataURL('image/jpeg', JPEG_QUALITY);
+    window.frameBase64  = (date) => window.frameDataUrl(date)?.split(',')[1];
+    window.allRendered  = false;
+
+    function loadTexture(url) {
+      return new Promise((resolve, reject) => {
+        const loader = new THREE.TextureLoader();
+        loader.crossOrigin = 'anonymous';
+        loader.load(url, resolve, undefined, reject);
+      });
+    }
+
+    function renderOne(date) {
+      const url = `${R2}/${PROJECT}/${date}/${ROOM}.jpg`;
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      const canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = H;
+      card.appendChild(canvas);
+      const label = document.createElement('div');
+      label.className = 'label';
+      label.textContent = date + ' — loading…';
+      card.appendChild(label);
+      grid.appendChild(card);
+
+      return loadTexture(url).then((texture) => {
+        if ('colorSpace' in texture && THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
+        else if ('encoding' in texture && THREE.sRGBEncoding) texture.encoding = THREE.sRGBEncoding;
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+        renderer.setSize(W, H, false);
+        if ('outputColorSpace' in renderer && THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
+        else if ('outputEncoding' in renderer && THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+
+        const scene = new THREE.Scene();
+        const geo = new THREE.SphereGeometry(500, 80, 60);
+        geo.scale(-1, 1, 1);
+        scene.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: texture })));
+
+        const cam = new THREE.PerspectiveCamera(FOV, W / H, 0.1, 1000);
+        cam.rotation.order = 'YXZ';
+        cam.rotation.y = -YAWS[date] * Math.PI / 180;
+        cam.rotation.x = PITCH * Math.PI / 180;
+
+        renderer.render(scene, cam);
+
+        window.frames[date] = canvas;
+        label.textContent = date + ' — done';
+        label.style.color = '#8ad4a0';
+      }).catch((err) => {
+        label.textContent = date + ' — FAILED: ' + (err?.message || err);
+        label.style.color = '#d48a8a';
+        console.error('[', date, ']', err);
+      });
+    }
+
+    async function renderAll() {
+      status.textContent = 'Rendering 7 dates sequentially…';
+      for (const date of DATES) {
+        await renderOne(date);
+      }
+      window.allRendered = true;
+      status.textContent = 'All 7 rendered. Ready for extraction.';
+      status.classList.add('done');
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>

@@ -100,18 +100,27 @@
     //   [0.20, 0.35]  02 Arrive      — exterior scales up + fades to dark
     //   [0.35, 0.55]  03 Kitchen     — finished kitchen fades in on top
     //   [0.55, 0.75]  04 Living Room — crossfades to living room
-    //   [0.75, 1.00]  05 Transform   — before/after dissolve of the kitchen
+    //   [0.75, 1.00]  05 Transform   — 7-frame construction time-lapse
     // ====================
-    const journeySection = document.querySelector('.act--journey');
-    const journeyVideo   = journeySection && journeySection.querySelector('.journey__video');
-    const layerExterior  = journeySection && journeySection.querySelector('.journey__layer--exterior');
-    const layerKitchen   = journeySection && journeySection.querySelector('.journey__layer--kitchen');
-    const layerLiving    = journeySection && journeySection.querySelector('.journey__layer--living');
-    const layerBefore    = journeySection && journeySection.querySelector('.journey__layer--before');
-    const layerAfter     = journeySection && journeySection.querySelector('.journey__layer--after');
-    const captions       = journeySection ? journeySection.querySelectorAll('.journey__caption') : [];
-    const progressItems  = journeySection ? journeySection.querySelectorAll('.journey__progress li') : [];
-    const journeyDate    = document.getElementById('journeyDate');
+    const journeySection    = document.querySelector('.act--journey');
+    const journeyVideo      = journeySection && journeySection.querySelector('.journey__video');
+    const layerExterior     = journeySection && journeySection.querySelector('.journey__layer--exterior');
+    const layerKitchen      = journeySection && journeySection.querySelector('.journey__layer--kitchen');
+    const layerLiving       = journeySection && journeySection.querySelector('.journey__layer--living');
+    const timelapseWrap     = journeySection && journeySection.querySelector('.journey__timelapse');
+    const timelapseFrames   = journeySection ? Array.from(journeySection.querySelectorAll('.journey__frame')) : [];
+    const captions          = journeySection ? journeySection.querySelectorAll('.journey__caption') : [];
+    const progressItems     = journeySection ? journeySection.querySelectorAll('.journey__progress li') : [];
+    const journeyDate       = document.getElementById('journeyDate');
+
+    // Format YYYYMMDD → "MON D, YYYY" for the time-lapse date label
+    const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    function formatDate(d) {
+      const y = d.slice(0, 4);
+      const m = parseInt(d.slice(4, 6), 10) - 1;
+      const day = parseInt(d.slice(6, 8), 10);
+      return `${MONTHS[m]} ${day}, ${y}`;
+    }
 
     if (hasGSAP && !reduceMotion && journeySection && journeyVideo) {
       // iOS/Safari: video needs to have "played once" before currentTime updates render
@@ -174,21 +183,38 @@
             // ---- Beat 04 (0.55 → 0.75): living room fades IN over kitchen ----
             layerLiving.style.opacity = fade(p, 0.55, 0.70).toFixed(3);
 
-            // ---- Beat 05 (0.75 → 1.00): before/after dissolve on top ----
-            // First the "after" image slides in (so there's always something under "before")
-            layerAfter.style.opacity = fade(p, 0.73, 0.80).toFixed(3);
-            // Then "before" fades in over it, then fades out again to reveal "after"
-            const beforeIn  = fade(p, 0.75, 0.82);
-            const beforeOut = fade(p, 0.88, 0.98);
-            layerBefore.style.opacity = (beforeIn * (1 - beforeOut)).toFixed(3);
-
-            // Date label reflects which image dominates right now:
-            //   before layer >= 50% opacity → May 2025
-            //   else                         → Dec 2025
-            if (journeyDate) {
-              const beforeNow = beforeIn * (1 - beforeOut);
-              const nextLabel = beforeNow >= 0.5 ? 'May 2025' : 'Dec 2025';
-              if (journeyDate.textContent !== nextLabel) journeyDate.textContent = nextLabel;
+            // ---- Beat 05 (0.75 → 1.00): 7-frame construction time-lapse ----
+            // Container fades in slightly before beat 5 starts so there's no gap.
+            // Frames inside crossfade sequentially across the sub-range [0.78, 0.99].
+            if (timelapseWrap) {
+              timelapseWrap.style.opacity = fade(p, 0.73, 0.78).toFixed(3);
+            }
+            if (timelapseFrames.length) {
+              // Map global p → subP in [0, 1] across the frame-crossfade range
+              const subP = clamp01((p - 0.78) / (0.99 - 0.78));
+              // Position within (N-1) intervals between the N frames
+              const n = timelapseFrames.length;
+              const pos = subP * (n - 1);
+              const lo = Math.floor(pos);
+              const hi = Math.min(n - 1, lo + 1);
+              const t = pos - lo;
+              // Only write opacity on the two active frames (lo + hi); clear the rest
+              for (let i = 0; i < n; i++) {
+                let op = 0;
+                if (i === lo && i === hi) op = 1;
+                else if (i === lo) op = 1 - t;
+                else if (i === hi) op = t;
+                timelapseFrames[i].style.opacity = op.toFixed(3);
+              }
+              // Date label follows the dominant frame
+              if (journeyDate) {
+                const dominantIdx = t >= 0.5 ? hi : lo;
+                const date = timelapseFrames[dominantIdx]?.dataset.date;
+                if (date) {
+                  const label = formatDate(date);
+                  if (journeyDate.textContent !== label) journeyDate.textContent = label;
+                }
+              }
             }
 
             // Which beat is "current" for caption + progress highlighting

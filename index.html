@@ -55,11 +55,11 @@
            02 Arrive      — exterior zooms in + fades to dark
            03 Kitchen     — finished kitchen fades in
            04 Living Room — crossfades to the living room
-           05 Transform   — before/after dissolve of the kitchen
+           05 Transform   — 7-frame construction time-lapse (May → Dec 2025)
          ===================================== -->
     <section class="act act--journey" id="journey">
-      <!-- Stacked layers, order bottom→top = EXTERIOR < KITCHEN < LIVING < AFTER < BEFORE.
-           Opacity is driven by scroll in js/main.js. -->
+      <!-- Stacked layers, order bottom→top = EXTERIOR < KITCHEN < LIVING < TIMELAPSE.
+           Opacity driven by scroll in js/main.js. -->
       <div class="journey__stage">
         <div class="journey__layer journey__layer--exterior">
           <video class="journey__video" muted playsinline preload="auto"
@@ -69,10 +69,26 @@
              style="background-image: url('https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20251206/Kitchen.jpg');"></div>
         <div class="journey__layer journey__layer--living"
              style="background-image: url('https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20251206/Living%20Room.jpg');"></div>
-        <div class="journey__layer journey__layer--after"
-             style="background-image: url('https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20251206/Kitchen.jpg');"></div>
-        <div class="journey__layer journey__layer--before"
-             style="background-image: url('https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20250502/Kitchen.jpg');"></div>
+
+        <!-- 7-frame construction time-lapse: Living Room 360 flat-rendered at
+             each date's own yaw (pre-aligned, see tools/align-timelapse.html). -->
+        <div class="journey__timelapse">
+          <div class="journey__frame" data-date="20250502"
+               style="background-image: url('images-flat/living-room-20250502.jpg');"></div>
+          <div class="journey__frame" data-date="20250621"
+               style="background-image: url('images-flat/living-room-20250621.jpg');"></div>
+          <div class="journey__frame" data-date="20250705"
+               style="background-image: url('images-flat/living-room-20250705.jpg');"></div>
+          <div class="journey__frame" data-date="20250731"
+               style="background-image: url('images-flat/living-room-20250731.jpg');"></div>
+          <div class="journey__frame" data-date="20250823"
+               style="background-image: url('images-flat/living-room-20250823.jpg');"></div>
+          <div class="journey__frame" data-date="20250919"
+               style="background-image: url('images-flat/living-room-20250919.jpg');"></div>
+          <div class="journey__frame" data-date="20251206"
+               style="background-image: url('images-flat/living-room-20251206.jpg');"></div>
+        </div>
+
         <div class="journey__vignette"></div>
       </div>
 
@@ -99,7 +115,7 @@
         <div class="journey__caption" data-beat="5">
           <div class="eyebrow">05 · Transformation</div>
           <h2>Watch a space<br><em>come to life.</em></h2>
-          <div class="journey__date" id="journeyDate">May 2025</div>
+          <div class="journey__date" id="journeyDate">MAY 2, 2025</div>
         </div>
       </div>
 
