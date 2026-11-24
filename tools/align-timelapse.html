@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Align time-lapse yaws</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #1a1614;
+      color: #D4C5B2;
+      font-family: 'Libre Baskerville', Georgia, serif;
+      padding: 24px;
+    }
+    h1 { font-weight: 400; font-size: 1.3rem; margin-bottom: 6px; }
+    p.lede { font-size: 0.9rem; color: #b8a99a; margin-bottom: 20px; max-width: 900px; }
+    .ref {
+      margin-bottom: 24px;
+    }
+    .ref h2 {
+      font-weight: 400;
+      font-style: italic;
+      color: #D4B89C;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+    .ref canvas {
+      width: 100%;
+      max-width: 600px;
+      display: block;
+      border: 2px solid #D4B89C;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .pane {
+      background: #000;
+      border: 1px solid rgba(212, 197, 178, 0.1);
+      position: relative;
+    }
+    .pane canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      cursor: grab;
+      user-select: none;
+    }
+    .pane canvas:active { cursor: grabbing; }
+    .pane .hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(10,9,8,0.75);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-family: ui-monospace, monospace;
+      color: #D4B89C;
+      backdrop-filter: blur(4px);
+    }
+    .pane .hint {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(10,9,8,0.75);
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      color: #b8a99a;
+      pointer-events: none;
+    }
+    .bar {
+      position: sticky;
+      bottom: 0;
+      background: #0a0908;
+      border-top: 1px solid rgba(212, 197, 178, 0.15);
+      padding: 16px 24px;
+      margin: 24px -24px -24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+    .bar button {
+      background: #D4B89C;
+      color: #2C2825;
+      border: none;
+      padding: 10px 20px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .bar button:hover { background: #c4a88c; }
+    .bar #capture {
+      font-size: 0.85rem;
+      color: #b8a99a;
+      font-family: ui-monospace, monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Time-lapse — Align each date to match the reference</h1>
+  <p class="lede">
+    Each dated Living Room 360 was shot with the camera pointing a different direction, so "yaw 0°" means something different each visit.
+    <strong>Drag each thumbnail left/right</strong> until the kitchen appears in the same spot as the reference below. Once all six look right, hit <strong>Capture yaws</strong> at the bottom.
+  </p>
+
+  <div class="ref">
+    <h2>Reference — 20251206 (Dec 6) at yaw 0°</h2>
+    <canvas id="refCanvas" width="600" height="375"></canvas>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="bar">
+    <div id="capture">Yaws will appear here after you click Capture.</div>
+    <button id="btn">Capture yaws</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
+  <script>
+    const R2 = 'https://pub-1008667921dc46088c845c1f999cb016.r2.dev';
+    const PROJECT = '1-1067Bakervale%20Drive/images';
+    const ROOM = 'Living%20Room';
+
+    // Dec 2025 is the reference. The other 6 are what the user adjusts.
+    const REFERENCE_DATE = '20251206';
+    const DATES_TO_ALIGN = [
+      '20250502',  // May 2
+      '20250621',  // Jun 21
+      '20250705',  // Jul 5
+      '20250731',  // Jul 31
+      '20250823',  // Aug 23
+      '20250919',  // Sep 19
+    ];
+
+    const FOV = 85;
+    const PITCH = 0;
+    const PANE_W = 600;
+    const PANE_H = 375;
+
+    // Store yaws as user drags
+    window.yaws = { [REFERENCE_DATE]: 0 };
+
+    function loadTexture(url) {
+      return new Promise((resolve, reject) => {
+        const loader = new THREE.TextureLoader();
+        loader.crossOrigin = 'anonymous';
+        loader.load(url, resolve, undefined, reject);
+      });
+    }
+
+    function makeScene(texture) {
+      const scene = new THREE.Scene();
+      const geo = new THREE.SphereGeometry(500, 80, 60);
+      geo.scale(-1, 1, 1);
+      scene.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: texture })));
+      return scene;
+    }
+
+    function makeCamera() {
+      const cam = new THREE.PerspectiveCamera(FOV, PANE_W / PANE_H, 0.1, 1000);
+      cam.rotation.order = 'YXZ';
+      cam.rotation.x = PITCH * Math.PI / 180;
+      return cam;
+    }
+
+    // Render the reference once (static)
+    (async () => {
+      const refCanvas = document.getElementById('refCanvas');
+      const tex = await loadTexture(`${R2}/${PROJECT}/${REFERENCE_DATE}/${ROOM}.jpg`);
+      if ('colorSpace' in tex && THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+      const renderer = new THREE.WebGLRenderer({ canvas: refCanvas, antialias: true, preserveDrawingBuffer: true });
+      renderer.setSize(PANE_W, PANE_H, false);
+      if ('outputColorSpace' in renderer && THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
+      const scene = makeScene(tex);
+      const cam = makeCamera();
+      cam.rotation.y = 0;
+      renderer.render(scene, cam);
+    })();
+
+    // Build a draggable pane per date
+    async function setupPane(date) {
+      const pane = document.createElement('div');
+      pane.className = 'pane';
+      const canvas = document.createElement('canvas');
+      canvas.width = PANE_W;
+      canvas.height = PANE_H;
+      pane.appendChild(canvas);
+
+      const hud = document.createElement('div');
+      hud.className = 'hud';
+      hud.textContent = `${date}  ·  yaw 0°`;
+      pane.appendChild(hud);
+
+      const hint = document.createElement('div');
+      hint.className = 'hint';
+      hint.textContent = 'Drag left/right to rotate';
+      pane.appendChild(hint);
+
+      document.getElementById('grid').appendChild(pane);
+
+      const tex = await loadTexture(`${R2}/${PROJECT}/${date}/${ROOM}.jpg`);
+      if ('colorSpace' in tex && THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+      renderer.setSize(PANE_W, PANE_H, false);
+      if ('outputColorSpace' in renderer && THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+      const scene = makeScene(tex);
+      const cam = makeCamera();
+
+      let yaw = 0;
+      window.yaws[date] = 0;
+
+      function render() {
+        cam.rotation.y = -yaw * Math.PI / 180;
+        renderer.render(scene, cam);
+        hud.textContent = `${date}  ·  yaw ${yaw.toFixed(1)}°`;
+      }
+      render();
+
+      // Mouse drag
+      let dragging = false;
+      let lastX = 0;
+      canvas.addEventListener('mousedown', (e) => {
+        dragging = true; lastX = e.clientX;
+      });
+      window.addEventListener('mouseup', () => { dragging = false; });
+      window.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - lastX;
+        lastX = e.clientX;
+        // Convert pixel drag → yaw delta.
+        // Full canvas width should sweep roughly one FOV, so scale FOV / PANE_W per pixel.
+        yaw -= dx * (FOV / PANE_W);
+        // Normalize to [0, 360)
+        yaw = ((yaw % 360) + 360) % 360;
+        window.yaws[date] = yaw;
+        render();
+      });
+
+      // Touch drag (mobile)
+      canvas.addEventListener('touchstart', (e) => {
+        dragging = true; lastX = e.touches[0].clientX;
+      }, { passive: true });
+      window.addEventListener('touchend', () => { dragging = false; });
+      window.addEventListener('touchmove', (e) => {
+        if (!dragging) return;
+        const dx = e.touches[0].clientX - lastX;
+        lastX = e.touches[0].clientX;
+        yaw -= dx * (FOV / PANE_W);
+        yaw = ((yaw % 360) + 360) % 360;
+        window.yaws[date] = yaw;
+        render();
+      }, { passive: true });
+    }
+
+    (async () => {
+      for (const d of DATES_TO_ALIGN) {
+        await setupPane(d);
+      }
+      // Signal all set up
+      window.allReady = true;
+    })();
+
+    // Capture button
+    document.getElementById('btn').addEventListener('click', () => {
+      const out = {};
+      for (const d of [REFERENCE_DATE, ...DATES_TO_ALIGN]) {
+        out[d] = Math.round(window.yaws[d] * 10) / 10;
+      }
+      document.getElementById('capture').textContent = JSON.stringify(out, null, 2);
+      window.capturedYaws = out;
+      console.log('CAPTURED YAWS:', out);
+    });
+  </script>
+</body>
+</html>
