@@ -240,6 +240,22 @@ html.lenis, html.lenis body { height: auto; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+}
+
+/* Living room orbit clip: scale slightly past the layer bounds to crop the
+   Luma AI watermark (top-right corner) and letterbox edges. Transform origin
+   pivoted below center so most of the extra scale comes off the top. */
+.journey__layer--living {
+  overflow: hidden;
+}
+.journey__living-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.22);
+  transform-origin: center 62%;
 }
 
 /* Time-lapse container: holds 7 construction frames, controlled by JS */

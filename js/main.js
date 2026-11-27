@@ -104,6 +104,7 @@
     // ====================
     const journeySection    = document.querySelector('.act--journey');
     const journeyVideo      = journeySection && journeySection.querySelector('.journey__video');
+    const livingVideo       = journeySection && journeySection.querySelector('.journey__living-video');
     const layerExterior     = journeySection && journeySection.querySelector('.journey__layer--exterior');
     const layerKitchen      = journeySection && journeySection.querySelector('.journey__layer--kitchen');
     const layerLiving       = journeySection && journeySection.querySelector('.journey__layer--living');
@@ -123,15 +124,19 @@
     }
 
     if (hasGSAP && !reduceMotion && journeySection && journeyVideo) {
-      // iOS/Safari: video needs to have "played once" before currentTime updates render
+      // iOS/Safari: videos need to have "played once" before currentTime updates render.
+      // Unlocks all scrubbable videos (exterior + living room orbit) on first interaction.
       let scrubUnlocked = false;
       const unlockScrub = () => {
         if (scrubUnlocked) return;
         scrubUnlocked = true;
-        const p = journeyVideo.play();
-        if (p && typeof p.then === 'function') {
-          p.then(() => journeyVideo.pause()).catch(() => {});
-        }
+        [journeyVideo, livingVideo].forEach((v) => {
+          if (!v) return;
+          const p = v.play();
+          if (p && typeof p.then === 'function') {
+            p.then(() => v.pause()).catch(() => {});
+          }
+        });
       };
       ['scroll', 'touchstart', 'pointerdown'].forEach((ev) =>
         window.addEventListener(ev, unlockScrub, { once: true, passive: true })
@@ -180,8 +185,17 @@
             // ---- Beat 03 (0.35 → 0.55): kitchen fades IN ----
             layerKitchen.style.opacity = fade(p, 0.32, 0.50).toFixed(3);
 
-            // ---- Beat 04 (0.55 → 0.75): living room fades IN over kitchen ----
+            // ---- Beat 04 (0.55 → 0.75): living room orbit video fades + scrubs ----
             layerLiving.style.opacity = fade(p, 0.55, 0.70).toFixed(3);
+            // Scroll-scrub the orbit: start when living room begins fading in,
+            // end just before the time-lapse fades over it.
+            if (livingVideo && livingVideo.duration) {
+              const orbitP = clamp01((p - 0.55) / (0.75 - 0.55));
+              const t = orbitP * livingVideo.duration;
+              if (Math.abs(livingVideo.currentTime - t) > 0.03) {
+                livingVideo.currentTime = t;
+              }
+            }
 
             // ---- Beat 05 (0.75 → 1.00): 7-frame construction time-lapse ----
             // Container fades in slightly before beat 5 starts so there's no gap.
