@@ -92,20 +92,17 @@
     }
 
     // ====================
-    // JOURNEY — one pinned section, 8 beats, data-driven.
+    // JOURNEY — one pinned section, 7 beats, data-driven.
     //
-    // Pin lasts +=700% of scroll (7 extra viewports). Scroll progress 0→1
-    // is divided into 8 beats. Beat data lives in BEATS — each room beat
-    // declares when it fades in and when its video scrubs.
+    // Pin lasts +=600% of scroll (6 extra viewports). Scroll progress 0→1
+    // is divided into 7 beats. Beat data lives in ROOM_BEATS — each room
+    // beat declares when it fades in and when its video scrubs.
     // ====================
     const journeySection    = document.querySelector('.act--journey');
     const journeyVideo      = journeySection && journeySection.querySelector('.journey__video');
     const layerExterior     = journeySection && journeySection.querySelector('.journey__layer--exterior');
-    const timelapseWrap     = journeySection && journeySection.querySelector('.journey__timelapse');
-    const timelapseFrames   = journeySection ? Array.from(journeySection.querySelectorAll('.journey__frame')) : [];
     const captions          = journeySection ? journeySection.querySelectorAll('.journey__caption') : [];
     const progressItems     = journeySection ? journeySection.querySelectorAll('.journey__progress li') : [];
-    const journeyDate       = document.getElementById('journeyDate');
 
     // Per-beat config. Each room has:
     //   layer:       the fading container
@@ -114,11 +111,11 @@
     //   scrub:       [start, end] range mapped onto the video's duration
     //   beatStart:   scroll progress at which this caption/progress goes active
     const ROOM_BEATS = journeySection ? [
-      { id: 'entrance', beat: 3, beatStart: 0.22, fadeIn: [0.18, 0.26], scrub: [0.22, 0.35] },
-      { id: 'kitchen',  beat: 4, beatStart: 0.35, fadeIn: [0.32, 0.40], scrub: [0.35, 0.48] },
-      { id: 'living',   beat: 5, beatStart: 0.48, fadeIn: [0.45, 0.53], scrub: [0.48, 0.60] },
-      { id: 'bedroom',  beat: 6, beatStart: 0.60, fadeIn: [0.57, 0.65], scrub: [0.60, 0.72] },
-      { id: 'office',   beat: 7, beatStart: 0.72, fadeIn: [0.69, 0.77], scrub: [0.72, 0.84] },
+      { id: 'entrance', beat: 3, beatStart: 0.26, fadeIn: [0.22, 0.30], scrub: [0.26, 0.42] },
+      { id: 'kitchen',  beat: 4, beatStart: 0.42, fadeIn: [0.38, 0.46], scrub: [0.42, 0.58] },
+      { id: 'living',   beat: 5, beatStart: 0.58, fadeIn: [0.54, 0.62], scrub: [0.58, 0.74] },
+      { id: 'bedroom',  beat: 6, beatStart: 0.74, fadeIn: [0.70, 0.78], scrub: [0.74, 0.88] },
+      { id: 'office',   beat: 7, beatStart: 0.88, fadeIn: [0.84, 0.92], scrub: [0.88, 1.00] },
     ].map((b) => ({
       ...b,
       layer: journeySection.querySelector(`.journey__layer--${b.id}`),
@@ -173,23 +170,23 @@
         ScrollTrigger.create({
           trigger: journeySection,
           start: 'top top',
-          end: '+=700%',          // 7 viewports of scroll while pinned (one per beat after hero)
+          end: '+=600%',          // 6 viewports of scroll while pinned
           pin: true,
           scrub: 0.6,
           anticipatePin: 1,
           onUpdate: (self) => {
             const p = self.progress;
 
-            // ---- Beat 01 (0.00 → 0.12): exterior video scrubs 0 → end ----
-            const videoP = clamp01(p / 0.12);
+            // ---- Beat 01 (0.00 → 0.14): exterior aerial scrubs 0 → end ----
+            const videoP = clamp01(p / 0.14);
             const t = videoP * journeyVideo.duration;
             if (Math.abs(journeyVideo.currentTime - t) > 0.03) {
               journeyVideo.currentTime = t;
             }
 
-            // ---- Beat 02 (0.12 → 0.22): exterior zooms + darkens ----
-            const zoom = 1 + fade(p, 0.00, 0.26) * 0.4;
-            const bright = 1 - fade(p, 0.14, 0.26) * 0.75;
+            // ---- Beat 02 (0.14 → 0.26): exterior zooms + darkens ----
+            const zoom = 1 + fade(p, 0.00, 0.30) * 0.4;
+            const bright = 1 - fade(p, 0.16, 0.30) * 0.75;
             layerExterior.style.transform = `scale(${zoom.toFixed(3)})`;
             layerExterior.style.filter = `brightness(${bright.toFixed(3)}) contrast(1.05)`;
 
@@ -206,39 +203,10 @@
               }
             }
 
-            // ---- Beat 08 (0.84 → 1.00): 7-frame construction time-lapse ----
-            if (timelapseWrap) {
-              timelapseWrap.style.opacity = fade(p, 0.82, 0.86).toFixed(3);
-            }
-            if (timelapseFrames.length) {
-              const subP = clamp01((p - 0.86) / (0.99 - 0.86));
-              const n = timelapseFrames.length;
-              const pos = subP * (n - 1);
-              const lo = Math.floor(pos);
-              const hi = Math.min(n - 1, lo + 1);
-              const tf = pos - lo;
-              for (let i = 0; i < n; i++) {
-                let op = 0;
-                if (i === lo && i === hi) op = 1;
-                else if (i === lo) op = 1 - tf;
-                else if (i === hi) op = tf;
-                timelapseFrames[i].style.opacity = op.toFixed(3);
-              }
-              if (journeyDate) {
-                const dominantIdx = tf >= 0.5 ? hi : lo;
-                const date = timelapseFrames[dominantIdx]?.dataset.date;
-                if (date) {
-                  const label = formatDate(date);
-                  if (journeyDate.textContent !== label) journeyDate.textContent = label;
-                }
-              }
-            }
-
             // Active beat for caption + progress indicator
             let beat = 1;
-            if (p >= 0.12) beat = 2;
+            if (p >= 0.14) beat = 2;
             for (const b of ROOM_BEATS) if (p >= b.beatStart) beat = b.beat;
-            if (p >= 0.84) beat = 8;
             setBeat(beat);
           },
         });
