@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Luma reference renderer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #1a1614;
+      color: #D4C5B2;
+      font-family: Georgia, serif;
+      padding: 24px;
+    }
+    h1 { font-weight: 400; font-size: 1.3rem; margin-bottom: 8px; }
+    p { color: #b8a99a; font-size: 0.9rem; margin-bottom: 16px; }
+    canvas {
+      width: 100%;
+      max-width: 1200px;
+      display: block;
+      border: 1px solid rgba(212, 197, 178, 0.15);
+    }
+    #status { margin-top: 12px; font-size: 0.85rem; color: #D4B89C; }
+  </style>
+</head>
+<body>
+  <h1>Luma reference — Living Room (Dec 2025) at yaw 0° · 1920×1080</h1>
+  <p>Rendered at 16:9 to match Luma Dream Machine's native aspect ratio. Image available as <code>window.lumaRefBase64()</code>.</p>
+  <canvas id="c" width="1920" height="1080"></canvas>
+  <div id="status">Loading…</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
+  <script>
+    const PANO = 'https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20251206/Living%20Room.jpg';
+    const YAW = 0;
+    const PITCH = 0;
+    const FOV = 85;
+    const W = 1920;
+    const H = 1080;
+    const JPEG_QUALITY = 0.9;  // higher quality for AI tooling
+
+    const canvas = document.getElementById('c');
+    const status = document.getElementById('status');
+
+    const loader = new THREE.TextureLoader();
+    loader.crossOrigin = 'anonymous';
+
+    loader.load(PANO, (texture) => {
+      if ('colorSpace' in texture && THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
+      else if ('encoding' in texture && THREE.sRGBEncoding) texture.encoding = THREE.sRGBEncoding;
+
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+      renderer.setSize(W, H, false);
+      if ('outputColorSpace' in renderer && THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
+      else if ('outputEncoding' in renderer && THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+
+      const scene = new THREE.Scene();
+      const geo = new THREE.SphereGeometry(500, 120, 80);  // higher subdivisions for cleaner interpolation
+      geo.scale(-1, 1, 1);
+      scene.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: texture })));
+
+      const cam = new THREE.PerspectiveCamera(FOV, W / H, 0.1, 1000);
+      cam.rotation.order = 'YXZ';
+      cam.rotation.y = -YAW * Math.PI / 180;
+      cam.rotation.x = PITCH * Math.PI / 180;
+
+      renderer.render(scene, cam);
+
+      window.lumaRef = canvas;
+      window.lumaRefDataUrl = () => canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+      window.lumaRefBase64  = () => window.lumaRefDataUrl().split(',')[1];
+      window.lumaRefReady   = true;
+
+      status.textContent = 'Rendered. window.lumaRefBase64() is ready.';
+    }, undefined, (err) => {
+      status.textContent = 'Failed: ' + (err?.message || err);
+      console.error(err);
+    });
+  </script>
+</body>
+</html>
