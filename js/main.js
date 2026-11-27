@@ -92,27 +92,38 @@
     }
 
     // ====================
-    // JOURNEY — one pinned section, 5 beats, Belgrade-Arbor style layered reveal.
+    // JOURNEY — one pinned section, 8 beats, data-driven.
     //
-    // Pin lasts +=500% of scroll (5 extra viewports of scrolling while pinned).
-    // Scroll progress 0→1 is divided into 5 beats:
-    //   [0.00, 0.20]  01 Approach    — video scrubs 0 → end
-    //   [0.20, 0.35]  02 Arrive      — exterior scales up + fades to dark
-    //   [0.35, 0.55]  03 Kitchen     — finished kitchen fades in on top
-    //   [0.55, 0.75]  04 Living Room — crossfades to living room
-    //   [0.75, 1.00]  05 Transform   — 7-frame construction time-lapse
+    // Pin lasts +=700% of scroll (7 extra viewports). Scroll progress 0→1
+    // is divided into 8 beats. Beat data lives in BEATS — each room beat
+    // declares when it fades in and when its video scrubs.
     // ====================
     const journeySection    = document.querySelector('.act--journey');
     const journeyVideo      = journeySection && journeySection.querySelector('.journey__video');
-    const livingVideo       = journeySection && journeySection.querySelector('.journey__living-video');
     const layerExterior     = journeySection && journeySection.querySelector('.journey__layer--exterior');
-    const layerKitchen      = journeySection && journeySection.querySelector('.journey__layer--kitchen');
-    const layerLiving       = journeySection && journeySection.querySelector('.journey__layer--living');
     const timelapseWrap     = journeySection && journeySection.querySelector('.journey__timelapse');
     const timelapseFrames   = journeySection ? Array.from(journeySection.querySelectorAll('.journey__frame')) : [];
     const captions          = journeySection ? journeySection.querySelectorAll('.journey__caption') : [];
     const progressItems     = journeySection ? journeySection.querySelectorAll('.journey__progress li') : [];
     const journeyDate       = document.getElementById('journeyDate');
+
+    // Per-beat config. Each room has:
+    //   layer:       the fading container
+    //   video:       the Luma video that scrubs
+    //   fadeIn:      [start, end] opacity ramp (0 → 1)
+    //   scrub:       [start, end] range mapped onto the video's duration
+    //   beatStart:   scroll progress at which this caption/progress goes active
+    const ROOM_BEATS = journeySection ? [
+      { id: 'entrance', beat: 3, beatStart: 0.22, fadeIn: [0.18, 0.26], scrub: [0.22, 0.35] },
+      { id: 'kitchen',  beat: 4, beatStart: 0.35, fadeIn: [0.32, 0.40], scrub: [0.35, 0.48] },
+      { id: 'living',   beat: 5, beatStart: 0.48, fadeIn: [0.45, 0.53], scrub: [0.48, 0.60] },
+      { id: 'bedroom',  beat: 6, beatStart: 0.60, fadeIn: [0.57, 0.65], scrub: [0.60, 0.72] },
+      { id: 'office',   beat: 7, beatStart: 0.72, fadeIn: [0.69, 0.77], scrub: [0.72, 0.84] },
+    ].map((b) => ({
+      ...b,
+      layer: journeySection.querySelector(`.journey__layer--${b.id}`),
+      video: journeySection.querySelector(`video[data-room="${b.id}"]`),
+    })) : [];
 
     // Format YYYYMMDD → "MON D, YYYY" for the time-lapse date label
     const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -125,13 +136,13 @@
 
     if (hasGSAP && !reduceMotion && journeySection && journeyVideo) {
       // iOS/Safari: videos need to have "played once" before currentTime updates render.
-      // Unlocks all scrubbable videos (exterior + living room orbit) on first interaction.
+      // Unlock all scrubbable videos (exterior + every room clip) on first interaction.
       let scrubUnlocked = false;
       const unlockScrub = () => {
         if (scrubUnlocked) return;
         scrubUnlocked = true;
-        [journeyVideo, livingVideo].forEach((v) => {
-          if (!v) return;
+        const all = [journeyVideo, ...ROOM_BEATS.map((b) => b.video)].filter(Boolean);
+        all.forEach((v) => {
           const p = v.play();
           if (p && typeof p.then === 'function') {
             p.then(() => v.pause()).catch(() => {});
@@ -162,67 +173,59 @@
         ScrollTrigger.create({
           trigger: journeySection,
           start: 'top top',
-          end: '+=500%',          // 5 viewports of scroll while pinned
+          end: '+=700%',          // 7 viewports of scroll while pinned (one per beat after hero)
           pin: true,
           scrub: 0.6,
           anticipatePin: 1,
           onUpdate: (self) => {
             const p = self.progress;
 
-            // ---- Beat 01 (0 → 0.20): video scrubs from frame 0 → end ----
-            const videoP = clamp01(p / 0.20);
+            // ---- Beat 01 (0.00 → 0.12): exterior video scrubs 0 → end ----
+            const videoP = clamp01(p / 0.12);
             const t = videoP * journeyVideo.duration;
             if (Math.abs(journeyVideo.currentTime - t) > 0.03) {
               journeyVideo.currentTime = t;
             }
 
-            // ---- Beat 02 (0.20 → 0.35): exterior scales up 1 → 1.4, darkens ----
-            const zoom = 1 + fade(p, 0.00, 0.40) * 0.4;
-            const bright = 1 - fade(p, 0.25, 0.45) * 0.75;
+            // ---- Beat 02 (0.12 → 0.22): exterior zooms + darkens ----
+            const zoom = 1 + fade(p, 0.00, 0.26) * 0.4;
+            const bright = 1 - fade(p, 0.14, 0.26) * 0.75;
             layerExterior.style.transform = `scale(${zoom.toFixed(3)})`;
             layerExterior.style.filter = `brightness(${bright.toFixed(3)}) contrast(1.05)`;
 
-            // ---- Beat 03 (0.35 → 0.55): kitchen fades IN ----
-            layerKitchen.style.opacity = fade(p, 0.32, 0.50).toFixed(3);
-
-            // ---- Beat 04 (0.55 → 0.75): living room orbit video fades + scrubs ----
-            layerLiving.style.opacity = fade(p, 0.55, 0.70).toFixed(3);
-            // Scroll-scrub the orbit: start when living room begins fading in,
-            // end just before the time-lapse fades over it.
-            if (livingVideo && livingVideo.duration) {
-              const orbitP = clamp01((p - 0.55) / (0.75 - 0.55));
-              const t = orbitP * livingVideo.duration;
-              if (Math.abs(livingVideo.currentTime - t) > 0.03) {
-                livingVideo.currentTime = t;
+            // ---- Beats 03–07 (room orbits): fade layer in + scrub its video ----
+            for (const b of ROOM_BEATS) {
+              if (!b.layer || !b.video) continue;
+              b.layer.style.opacity = fade(p, b.fadeIn[0], b.fadeIn[1]).toFixed(3);
+              if (b.video.duration) {
+                const sp = clamp01((p - b.scrub[0]) / (b.scrub[1] - b.scrub[0]));
+                const vt = sp * b.video.duration;
+                if (Math.abs(b.video.currentTime - vt) > 0.03) {
+                  b.video.currentTime = vt;
+                }
               }
             }
 
-            // ---- Beat 05 (0.75 → 1.00): 7-frame construction time-lapse ----
-            // Container fades in slightly before beat 5 starts so there's no gap.
-            // Frames inside crossfade sequentially across the sub-range [0.78, 0.99].
+            // ---- Beat 08 (0.84 → 1.00): 7-frame construction time-lapse ----
             if (timelapseWrap) {
-              timelapseWrap.style.opacity = fade(p, 0.73, 0.78).toFixed(3);
+              timelapseWrap.style.opacity = fade(p, 0.82, 0.86).toFixed(3);
             }
             if (timelapseFrames.length) {
-              // Map global p → subP in [0, 1] across the frame-crossfade range
-              const subP = clamp01((p - 0.78) / (0.99 - 0.78));
-              // Position within (N-1) intervals between the N frames
+              const subP = clamp01((p - 0.86) / (0.99 - 0.86));
               const n = timelapseFrames.length;
               const pos = subP * (n - 1);
               const lo = Math.floor(pos);
               const hi = Math.min(n - 1, lo + 1);
-              const t = pos - lo;
-              // Only write opacity on the two active frames (lo + hi); clear the rest
+              const tf = pos - lo;
               for (let i = 0; i < n; i++) {
                 let op = 0;
                 if (i === lo && i === hi) op = 1;
-                else if (i === lo) op = 1 - t;
-                else if (i === hi) op = t;
+                else if (i === lo) op = 1 - tf;
+                else if (i === hi) op = tf;
                 timelapseFrames[i].style.opacity = op.toFixed(3);
               }
-              // Date label follows the dominant frame
               if (journeyDate) {
-                const dominantIdx = t >= 0.5 ? hi : lo;
+                const dominantIdx = tf >= 0.5 ? hi : lo;
                 const date = timelapseFrames[dominantIdx]?.dataset.date;
                 if (date) {
                   const label = formatDate(date);
@@ -231,12 +234,11 @@
               }
             }
 
-            // Which beat is "current" for caption + progress highlighting
+            // Active beat for caption + progress indicator
             let beat = 1;
-            if (p >= 0.20) beat = 2;
-            if (p >= 0.35) beat = 3;
-            if (p >= 0.55) beat = 4;
-            if (p >= 0.75) beat = 5;
+            if (p >= 0.12) beat = 2;
+            for (const b of ROOM_BEATS) if (p >= b.beatStart) beat = b.beat;
+            if (p >= 0.84) beat = 8;
             setBeat(beat);
           },
         });

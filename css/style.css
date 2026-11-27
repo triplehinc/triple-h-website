@@ -231,10 +231,14 @@ html.lenis, html.lenis body { height: auto; }
   will-change: opacity, transform, filter;
 }
 
-/* z-index stack (bottom → top): exterior < kitchen < living < timelapse */
+/* z-index stack (bottom → top). Each room sits one layer higher so subsequent
+   beats visually cover the previous ones. */
 .journey__layer--exterior { z-index: 1; }
-.journey__layer--kitchen  { z-index: 2; opacity: 0; }
-.journey__layer--living   { z-index: 3; opacity: 0; }
+.journey__layer--entrance { z-index: 2; opacity: 0; overflow: hidden; }
+.journey__layer--kitchen  { z-index: 3; opacity: 0; overflow: hidden; }
+.journey__layer--living   { z-index: 4; opacity: 0; overflow: hidden; }
+.journey__layer--bedroom  { z-index: 5; opacity: 0; overflow: hidden; }
+.journey__layer--office   { z-index: 6; opacity: 0; overflow: hidden; }
 
 .journey__video {
   width: 100%;
@@ -243,13 +247,11 @@ html.lenis, html.lenis body { height: auto; }
   display: block;
 }
 
-/* Living room orbit clip: scale slightly past the layer bounds to crop the
-   Luma AI watermark (top-right corner) and letterbox edges. Transform origin
-   pivoted below center so most of the extra scale comes off the top. */
-.journey__layer--living {
-  overflow: hidden;
-}
-.journey__living-video {
+/* Shared crop transform on every Luma-generated beat video.
+   Scales the video 22% past its container (with transform-origin below center
+   so more comes off the top) — crops the Luma AI watermark and letterbox
+   edges in one pass. */
+.journey__beat-video {
   width: 100%;
   height: 100%;
   object-fit: cover;

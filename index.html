@@ -50,30 +50,46 @@
     </section>
 
     <!-- =====================================
-         ACT 2–4 — JOURNEY. One pinned scene with 5 beats:
+         ACT 2 — JOURNEY. One pinned scene with 8 beats:
            01 Approach    — house exterior scrubs with scroll
            02 Arrive      — exterior zooms in + fades to dark
-           03 Kitchen     — finished kitchen fades in
-           04 Living Room — crossfades to the living room
-           05 Transform   — 7-frame construction time-lapse (May → Dec 2025)
+           03 Entrance    — entrance orbit (Luma)
+           04 Kitchen     — kitchen dolly (Luma)
+           05 Living Room — living room orbit (Luma)
+           06 Bedroom     — bedroom pan (Luma)
+           07 Office      — office orbit (Luma)
+           08 Transform   — 7-frame construction time-lapse (May → Dec 2025)
          ===================================== -->
     <section class="act act--journey" id="journey">
-      <!-- Stacked layers, order bottom→top = EXTERIOR < KITCHEN < LIVING < TIMELAPSE.
-           Opacity driven by scroll in js/main.js. -->
+      <!-- Stacked layers, each room's clip fades in over the previous.
+           Opacity + currentTime driven by scroll in js/main.js. -->
       <div class="journey__stage">
         <div class="journey__layer journey__layer--exterior">
           <video class="journey__video" muted playsinline preload="auto"
                  src="videos/house-exterior.mp4"></video>
         </div>
-        <div class="journey__layer journey__layer--kitchen"
-             style="background-image: url('https://pub-1008667921dc46088c845c1f999cb016.r2.dev/1-1067Bakervale%20Drive/images/20251206/Kitchen.jpg');"></div>
+        <div class="journey__layer journey__layer--entrance">
+          <video class="journey__beat-video" muted playsinline preload="auto"
+                 src="videos/entrance-orbit.mp4" data-room="entrance"></video>
+        </div>
+        <div class="journey__layer journey__layer--kitchen">
+          <video class="journey__beat-video" muted playsinline preload="auto"
+                 src="videos/kitchen-orbit.mp4" data-room="kitchen"></video>
+        </div>
         <div class="journey__layer journey__layer--living">
-          <video class="journey__living-video" muted playsinline preload="auto"
-                 src="videos/living-room-orbit.mp4"></video>
+          <video class="journey__beat-video" muted playsinline preload="auto"
+                 src="videos/living-room-orbit.mp4" data-room="living"></video>
+        </div>
+        <div class="journey__layer journey__layer--bedroom">
+          <video class="journey__beat-video" muted playsinline preload="auto"
+                 src="videos/bedroom-orbit.mp4" data-room="bedroom"></video>
+        </div>
+        <div class="journey__layer journey__layer--office">
+          <video class="journey__beat-video" muted playsinline preload="auto"
+                 src="videos/office-orbit.mp4" data-room="office"></video>
         </div>
 
-        <!-- 7-frame construction time-lapse: Living Room 360 flat-rendered at
-             each date's own yaw (pre-aligned, see tools/align-timelapse.html). -->
+        <!-- 7-frame construction time-lapse at the end of the journey. -->
         <div class="journey__timelapse">
           <div class="journey__frame" data-date="20250502"
                style="background-image: url('images-flat/living-room-20250502.jpg');"></div>
@@ -94,7 +110,7 @@
         <div class="journey__vignette"></div>
       </div>
 
-      <!-- Captions, one shown at a time based on which beat we're in -->
+      <!-- Captions — one shown at a time based on current beat -->
       <div class="journey__captions">
         <div class="journey__caption is-active" data-beat="1">
           <div class="eyebrow">01 · Approach</div>
@@ -105,29 +121,47 @@
           <h2>Every project starts<br>with <em>a vision.</em></h2>
         </div>
         <div class="journey__caption" data-beat="3">
-          <div class="eyebrow">03 · The Kitchen</div>
+          <div class="eyebrow">03 · The Entrance</div>
           <h2>Step <em>inside.</em></h2>
-          <p>Every material chosen. Every finish considered.</p>
+          <p>Where the story begins.</p>
         </div>
         <div class="journey__caption" data-beat="4">
-          <div class="eyebrow">04 · The Living Room</div>
+          <div class="eyebrow">04 · The Kitchen</div>
+          <h2>The heart<br>of <em>the home.</em></h2>
+          <p>Every material chosen. Every finish considered.</p>
+        </div>
+        <div class="journey__caption" data-beat="5">
+          <div class="eyebrow">05 · The Living Room</div>
           <h2>A space to <em>live in.</em></h2>
           <p>Where the day begins and ends.</p>
         </div>
-        <div class="journey__caption" data-beat="5">
-          <div class="eyebrow">05 · Transformation</div>
+        <div class="journey__caption" data-beat="6">
+          <div class="eyebrow">06 · The Bedroom</div>
+          <h2>Quiet,<br><em>considered.</em></h2>
+          <p>Rest designed for.</p>
+        </div>
+        <div class="journey__caption" data-beat="7">
+          <div class="eyebrow">07 · The Office</div>
+          <h2>Where work<br><em>feels like home.</em></h2>
+          <p>Space to think, space to build.</p>
+        </div>
+        <div class="journey__caption" data-beat="8">
+          <div class="eyebrow">08 · Transformation</div>
           <h2>Watch a space<br><em>come to life.</em></h2>
           <div class="journey__date" id="journeyDate">MAY 2, 2025</div>
         </div>
       </div>
 
-      <!-- Numbered progress indicator (Belgrade-style) -->
+      <!-- Numbered progress indicator -->
       <ol class="journey__progress" aria-label="Journey progress">
         <li data-beat="1" class="is-active"><span>01</span></li>
         <li data-beat="2"><span>02</span></li>
         <li data-beat="3"><span>03</span></li>
         <li data-beat="4"><span>04</span></li>
         <li data-beat="5"><span>05</span></li>
+        <li data-beat="6"><span>06</span></li>
+        <li data-beat="7"><span>07</span></li>
+        <li data-beat="8"><span>08</span></li>
       </ol>
     </section>
 
